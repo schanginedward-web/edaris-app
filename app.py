@@ -72,14 +72,14 @@ def login():
         if "auth_view" not in st.session_state:
             st.session_state.auth_view = "login"
             
-        # Schicke Buttons statt Tabs
+        # Schicke Buttons statt Tabs (mit eindeutigen Keys, um Duplikate zu vermeiden)
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Einloggen", use_container_width=True, type="primary" if st.session_state.auth_view == "login" else "secondary"):
+            if st.button("Einloggen", key="btn_tab_login", use_container_width=True, type="primary" if st.session_state.auth_view == "login" else "secondary"):
                 st.session_state.auth_view = "login"
                 st.rerun()
         with c2:
-            if st.button("Registrieren", use_container_width=True, type="primary" if st.session_state.auth_view == "register" else "secondary"):
+            if st.button("Registrieren", key="btn_tab_register", use_container_width=True, type="primary" if st.session_state.auth_view == "register" else "secondary"):
                 st.session_state.auth_view = "register"
                 st.rerun()
                 
@@ -91,7 +91,7 @@ def login():
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
             password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Einloggen", use_container_width=True, type="primary"):
+            if st.button("Jetzt einloggen", key="btn_submit_login", use_container_width=True, type="primary"):
                 try:
                     response = supabase.auth.sign_in_with_password({"email": email, "password": password})
                     st.session_state.user = response.user
@@ -105,7 +105,7 @@ def login():
             new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
             new_password = st.text_input("Passwort", type="password", key="reg_password", placeholder="Mindestens 6 Zeichen")
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Konto erstellen", use_container_width=True, type="primary"):
+            if st.button("Jetzt registrieren", key="btn_submit_register", use_container_width=True, type="primary"):
                 try:
                     response = supabase.auth.sign_up({"email": new_email, "password": new_password})
                     st.success("Konto erstellt! Bitte prüfe deine E-Mails oder logge dich direkt ein.")
@@ -146,11 +146,11 @@ def main():
         st.markdown("⭐ Status: **Beta-Tester**")
         
         st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button("🔄 Daten aktualisieren", use_container_width=True):
+        if st.button("🔄 Daten aktualisieren", use_container_width=True, key="btn_refresh"):
             st.cache_data.clear()
             st.rerun()
             
-        if st.button("🚪 Ausloggen", use_container_width=True):
+        if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
             supabase.auth.sign_out()
             st.session_state.user = None
             st.rerun()
