@@ -15,6 +15,7 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
+    /* Haupt-Hintergrund */
     .stApp { background-color: #f5f1e8; font-family: 'Inter', sans-serif; }
     h1, h2, h3 { font-family: 'Cormorant Garamond', serif !important; color: #1e3a8a !important; font-weight: 600 !important; }
 
@@ -32,9 +33,35 @@ st.markdown("""
     div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
     div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 600 !important; border-bottom: 2px solid #b8935a !important; }
 
-    /* Buttons */
+    /* Buttons (Haupt) */
     .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.3s; }
-    .stButton > button:hover { background-color: #b8935a; color: #ffffff; }
+    .stButton > button:hover { background-color: #b8935a; color: #ffffff; border-color: #b8935a; }
+    
+    /* Eingabefelder im Login */
+    div[data-testid="stTextInput"] input {
+        background-color: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 12px 15px !important;
+        color: #1e3a8a !important;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #b8935a !important;
+        box-shadow: 0 0 0 2px rgba(184, 147, 90, 0.2) !important;
+    }
+
+    /* Tabs (für Login/Registrieren) */
+    button[data-baseweb="tab"] {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #6b7280;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #1e3a8a;
+        border-bottom-color: #b8935a !important;
+    }
+    
     hr { border-color: #d1d5db; }
     </style>
 """, unsafe_allow_html=True)
@@ -48,16 +75,27 @@ supabase = init_supabase()
 
 # ==================== AUTHENTIFIZIERUNG ====================
 def login():
-    st.markdown("<h1 style='text-align: center; margin-top: 100px; font-size: 3rem;'>🔒 Edaris AI</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #6b7280;'>Bitte logge dich ein oder registriere dich.</p>", unsafe_allow_html=True)
+    # Ein schicker Container für das Login
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1.2, 1])
     
-    col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        tab1, tab2 = st.tabs(["Login", "Registrieren"])
+        # Das Logo/Den Namen groß und edel darstellen
+        st.markdown("<h1 style='text-align: center; font-size: 4rem; margin-bottom: 0;'>Edaris</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 0.9rem; letter-spacing: 4px; color: #b8935a; text-transform: uppercase; margin-bottom: 40px;'>Intelligence</p>", unsafe_allow_html=True)
+        
+        # Weiße Karte für das Formular
+        st.markdown("""
+            <div style="background-color: #ffffff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 4px solid #b8935a;">
+        """, unsafe_allow_html=True)
+        
+        tab1, tab2 = st.tabs(["Einloggen", "Registrieren"])
         
         with tab1:
-            email = st.text_input("E-Mail", key="login_email")
-            password = st.text_input("Passwort", type="password", key="login_password")
+            st.markdown("<p style='color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
+            email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
+            password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Einloggen", use_container_width=True):
                 try:
                     response = supabase.auth.sign_in_with_password({"email": email, "password": password})
@@ -67,14 +105,18 @@ def login():
                     st.error(f"Login fehlgeschlagen: {e}")
                     
         with tab2:
-            new_email = st.text_input("E-Mail", key="reg_email")
-            new_password = st.text_input("Passwort", type="password", key="reg_password")
+            st.markdown("<p style='color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
+            new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
+            new_password = st.text_input("Passwort", type="password", key="reg_password", placeholder="Mindestens 6 Zeichen")
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Konto erstellen", use_container_width=True):
                 try:
                     response = supabase.auth.sign_up({"email": new_email, "password": new_password})
-                    st.success("Konto erstellt! Du kannst dich jetzt einloggen.")
+                    st.success("Konto erstellt! Bitte prüfe deine E-Mails oder logge dich direkt ein.")
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
+                    
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================== DATEN LADEN ====================
 @st.cache_data(ttl=60)
@@ -90,7 +132,6 @@ def load_data():
 
 # ==================== HAUPT-APP ====================
 def main():
-    # Session State initialisieren
     if "user" not in st.session_state:
         st.session_state.user = None
 
