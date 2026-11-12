@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
+import requests
 from supabase import create_client, Client
 import plotly.graph_objects as go
 
@@ -96,35 +97,16 @@ def login():
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
 
-# ==================== DATEN LADEN ====================
-import requests
-
+# ==================== DATEN LADEN (FINALER FIX) ====================
 def load_data():
     try:
-        # Wir umgehen die Supabase-Bibliothek und nutzen einen direkten API-Call
-        url = f"{SUPABASE_URL}/rest/v1/live_data?id=eq.1"
-        headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}"
-        }
-        
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data and len(data) > 0:
-                # Wir zeigen die Rohdaten im Debug an
-                st.info(f"DEBUG RAW: {str(data[0])[:200]}...") # Zeigt die ersten 200 Zeichen
-                return data[0]
-            else:
-                st.error("APP-DEBUG: Die Tabelle hat keine Zeile mit ID 1.")
-                return None
-        else:
-            st.error(f"APP-DEBUG API FEHLER: {response.status_code} - {response.text}")
-            return None
-            
+        response = supabase.table('live_data').select('*').eq('id', 1).execute()
+        if response.data:
+            # WIR MÜSSEN DAS PAKET ÖFFNEN! Die Daten liegen in ['data']
+            return response.data[0]['data']
+        return None
     except Exception as e:
-        st.error(f"APP-DEBUG EXCEPTION: {e}")
+        st.error(f"Fehler beim Laden der Daten: {e}")
         return None
 
 # ==================== APP-ANSICHTEN ====================
