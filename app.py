@@ -15,126 +15,71 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
-    /* Haupt-Hintergrund */
-    .stApp {
-        background-color: #f5f1e8;
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Überschriften */
-    h1, h2, h3 {
-        font-family: 'Cormorant Garamond', serif !important;
-        color: #1e3a8a !important;
-        font-weight: 600 !important;
-    }
+    .stApp { background-color: #f5f1e8; font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Cormorant Garamond', serif !important; color: #1e3a8a !important; font-weight: 600 !important; }
 
     /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: #0f172a;
-        border-right: 1px solid #1e3a8a;
-    }
-    section[data-testid="stSidebar"] h2 {
-        color: #b8935a !important;
-        font-family: 'Cormorant Garamond', serif !important;
-        letter-spacing: 2px;
-    }
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {
-        color: #f5f1e8 !important;
-    }
+    section[data-testid="stSidebar"] { background-color: #0f172a; border-right: 1px solid #1e3a8a; }
+    section[data-testid="stSidebar"] h2 { color: #b8935a !important; font-family: 'Cormorant Garamond', serif !important; letter-spacing: 2px; }
+    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span { color: #f5f1e8 !important; }
 
-    /* KPI Kacheln (Metriken) */
-    div[data-testid="stMetric"] {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        border-top: 3px solid #b8935a;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    div[data-testid="stMetricValue"] {
-        font-family: 'Cormorant Garamond', serif;
-        color: #1e3a8a;
-        font-size: 2.8rem;
-        font-weight: 700;
-    }
-    div[data-testid="stMetricLabel"] {
-        font-family: 'Inter', sans-serif;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
+    /* KPI Kacheln */
+    div[data-testid="stMetric"] { background-color: #ffffff; padding: 20px; border-radius: 12px; border-top: 3px solid #b8935a; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    div[data-testid="stMetricValue"] { font-family: 'Cormorant Garamond', serif; color: #1e3a8a; font-size: 2.8rem; font-weight: 700; }
+    div[data-testid="stMetricLabel"] { font-family: 'Inter', sans-serif; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.8rem; font-weight: 600; }
 
-    /* Tabellen (DataFrames) */
-    div[data-testid="stDataFrame"] {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-    }
-    div[data-testid="stDataFrame"] table {
-        font-family: 'Inter', sans-serif;
-    }
-    div[data-testid="stDataFrame"] th {
-        background-color: #f5f1e8 !important;
-        color: #1e3a8a !important;
-        font-weight: 600 !important;
-        border-bottom: 2px solid #b8935a !important;
-    }
+    /* Tabellen */
+    div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
+    div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 600 !important; border-bottom: 2px solid #b8935a !important; }
 
     /* Buttons */
-    .stButton > button {
-        background-color: #1e3a8a;
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-    .stButton > button:hover {
-        background-color: #b8935a;
-        color: #ffffff;
-    }
-
-    /* Trennlinien */
-    hr {
-        border-color: #d1d5db;
-    }
+    .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.3s; }
+    .stButton > button:hover { background-color: #b8935a; color: #ffffff; }
+    hr { border-color: #d1d5db; }
     </style>
 """, unsafe_allow_html=True)
 
-# ==================== LOGIN ====================
-def check_password():
-    def password_entered():
-        if st.session_state["password"] == "edaris2026":
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
-    if "password_correct" not in st.session_state:
-        st.markdown("<h2 style='text-align: center; margin-top: 150px; font-size: 3rem;'>🔒 Edaris AI</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #6b7280;'>Bitte logge dich ein, um fortzufahren.</p>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            st.text_input("Passwort (Beta: edaris2026)", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.markdown("<h2 style='text-align: center; margin-top: 150px; font-size: 3rem;'>🔒 Edaris AI</h2>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            st.text_input("Passwort", type="password", on_change=password_entered, key="password")
-            st.error("😕 Falsches Passwort")
-        return False
-    return True
+# ==================== SUPABASE CLIENT ====================
+@st.cache_resource
+def init_supabase():
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
+
+supabase = init_supabase()
+
+# ==================== AUTHENTIFIZIERUNG ====================
+def login():
+    st.markdown("<h1 style='text-align: center; margin-top: 100px; font-size: 3rem;'>🔒 Edaris AI</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #6b7280;'>Bitte logge dich ein oder registriere dich.</p>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        tab1, tab2 = st.tabs(["Login", "Registrieren"])
+        
+        with tab1:
+            email = st.text_input("E-Mail", key="login_email")
+            password = st.text_input("Passwort", type="password", key="login_password")
+            if st.button("Einloggen", use_container_width=True):
+                try:
+                    response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                    st.session_state.user = response.user
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Login fehlgeschlagen: {e}")
+                    
+        with tab2:
+            new_email = st.text_input("E-Mail", key="reg_email")
+            new_password = st.text_input("Passwort", type="password", key="reg_password")
+            if st.button("Konto erstellen", use_container_width=True):
+                try:
+                    response = supabase.auth.sign_up({"email": new_email, "password": new_password})
+                    st.success("Konto erstellt! Du kannst dich jetzt einloggen.")
+                except Exception as e:
+                    st.error(f"Registrierung fehlgeschlagen: {e}")
 
 # ==================== DATEN LADEN ====================
 @st.cache_data(ttl=60)
 def load_data():
     try:
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         response = supabase.table('live_data').select('data').eq('id', 1).execute()
         if response.data:
             return response.data[0]['data']
@@ -145,8 +90,16 @@ def load_data():
 
 # ==================== HAUPT-APP ====================
 def main():
-    if not check_password():
+    # Session State initialisieren
+    if "user" not in st.session_state:
+        st.session_state.user = None
+
+    if st.session_state.user is None:
+        login()
         return
+    
+    # Ab hier ist der Nutzer eingeloggt
+    user_email = st.session_state.user.email
     
     # Sidebar
     with st.sidebar:
@@ -155,12 +108,17 @@ def main():
         st.markdown("<p style='text-align: center; font-size: 0.8rem; letter-spacing: 3px; color: #b8935a !important;'>INTELLIGENCE</p>", unsafe_allow_html=True)
         st.markdown("<br><hr style='border-color: #1e3a8a;'><br>", unsafe_allow_html=True)
         
-        st.markdown("👤 **Account 1**")
+        st.markdown(f"👤 **{user_email}**")
         st.markdown("⭐ Status: **Beta-Tester**")
         
         st.markdown("<br><br>", unsafe_allow_html=True)
         if st.button("🔄 Daten aktualisieren", use_container_width=True):
             st.cache_data.clear()
+            st.rerun()
+            
+        if st.button("🚪 Ausloggen", use_container_width=True):
+            supabase.auth.sign_out()
+            st.session_state.user = None
             st.rerun()
             
     # Hauptinhalt
@@ -188,11 +146,10 @@ def main():
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # ==================== CHART (Plotly für edlen Look) ====================
+    # ==================== CHART ====================
     if history:
         st.markdown("<h3 style='margin-bottom: 20px;'>📈 Performance-Verlauf</h3>", unsafe_allow_html=True)
         
-        # Verlauf aus der Historie berechnen
         dates = [t['date'][:10] for t in history]
         values = [10000]
         current_val = 10000
@@ -218,22 +175,14 @@ def main():
             fillcolor='rgba(184, 147, 90, 0.1)'
         ))
         
-        # Dynamische Y-Achse, damit die Linie immer gut sichtbar ist
         min_val = min(values) * 0.98
         max_val = max(values) * 1.02
         
         fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
             margin=dict(l=0, r=0, t=10, b=0),
             xaxis=dict(showgrid=False, color='#6b7280', type='category'),
-            yaxis=dict(
-                showgrid=True, 
-                gridcolor='#e5e7eb', 
-                color='#6b7280',
-                range=[min_val, max_val],
-                tickprefix="$"
-            ),
+            yaxis=dict(showgrid=True, gridcolor='#e5e7eb', color='#6b7280', range=[min_val, max_val], tickprefix="$"),
             height=350
         )
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
