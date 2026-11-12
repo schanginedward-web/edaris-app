@@ -130,9 +130,17 @@ def login():
 # ==================== DATEN LADEN ====================
 def load_data():
     try:
+        # Wir fragen die Datenbank ab und ignorieren dabei den Cache
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
-            return response.data[0]['data']
+            row = response.data[0]
+            # Wir packen die Daten zusammen und geben sie zurück
+            return {
+                "capital": row['data']['capital'],
+                "positions": row['data']['positions'],
+                "history": row['data']['history'],
+                "scanner_data": row.get('scanner_data', [])
+            }
         return None
     except Exception as e:
         st.error(f"Fehler beim Laden der Daten: {e}")
