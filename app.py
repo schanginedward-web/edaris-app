@@ -3,7 +3,7 @@ import pandas as pd
 from supabase import create_client, Client
 
 # ==================== KONFIGURATION ====================
-SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co/rest/v1/"
+SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co"
 SUPABASE_KEY = "sb_publishable_cYbHqfJ9-CPddBtmzu7vYA_by5W0-Js"
 
 st.set_page_config(page_title="Edaris AI", page_icon="📊", layout="wide")
