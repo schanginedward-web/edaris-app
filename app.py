@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co"
 SUPABASE_KEY = "sb_publishable_cYbHqfJ9-CPddBtmzu7vYA_by5W0-Js"
 
-st.set_page_config(page_title="Edaris AI", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Edaris AI", page_icon="📊", layout="wide", initial_sidebar_state="expanded")
 
 # ==================== CUSTOM CSS ====================
 st.markdown("""
@@ -33,7 +33,7 @@ st.markdown("""
     div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
     div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 700 !important; border-bottom: 2px solid #b8935a !important; }
 
-    /* Buttons (Standard) */
+    /* Buttons */
     .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px; }
     .stButton > button:hover { background-color: #b8935a; color: #ffffff; border-color: #b8935a; }
     
@@ -64,15 +64,12 @@ def login():
     col1, col2, col3 = st.columns([1, 1.2, 1])
     
     with col2:
-        # Logo Bereich
         st.markdown("<h1 style='text-align: center; font-size: 4rem; margin-bottom: 0; color: #1e3a8a;'>Edaris</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.9rem; letter-spacing: 4px; color: #b8935a; text-transform: uppercase; margin-bottom: 30px; font-weight: 600;'>Intelligence</p>", unsafe_allow_html=True)
         
-        # View-Zustand (Login oder Registrieren)
         if "auth_view" not in st.session_state:
             st.session_state.auth_view = "login"
             
-        # Schicke Buttons statt Tabs (mit eindeutigen Keys, um Duplikate zu vermeiden)
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Einloggen", key="btn_tab_login", use_container_width=True, type="primary" if st.session_state.auth_view == "login" else "secondary"):
@@ -85,7 +82,6 @@ def login():
                 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Login Formular
         if st.session_state.auth_view == "login":
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
@@ -98,8 +94,6 @@ def login():
                     st.rerun()
                 except Exception as e:
                     st.error(f"Login fehlgeschlagen: {e}")
-                    
-        # Registrieren Formular
         else:
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
             new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
@@ -116,54 +110,16 @@ def login():
 @st.cache_data(ttl=60)
 def load_data():
     try:
-        response = supabase.table('live_data').select('data').eq('id', 1).execute()
+        response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
-            return response.data[0]['data']
+            return response.data[0]
         return None
     except Exception as e:
         st.error(f"Fehler beim Laden der Daten: {e}")
         return None
 
-# ==================== HAUPT-APP ====================
-def main():
-    if "user" not in st.session_state:
-        st.session_state.user = None
-
-    if st.session_state.user is None:
-        login()
-        return
-    
-    user_email = st.session_state.user.email
-    
-    # Sidebar
-    with st.sidebar:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center;'>Edaris</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; font-size: 0.8rem; letter-spacing: 3px; color: #b8935a !important;'>INTELLIGENCE</p>", unsafe_allow_html=True)
-        st.markdown("<br><hr style='border-color: #1e3a8a;'><br>", unsafe_allow_html=True)
-        
-        st.markdown(f"👤 **{user_email}**")
-        st.markdown("⭐ Status: **Beta-Tester**")
-        
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button("🔄 Daten aktualisieren", use_container_width=True, key="btn_refresh"):
-            st.cache_data.clear()
-            st.rerun()
-            
-        if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
-            supabase.auth.sign_out()
-            st.session_state.user = None
-            st.rerun()
-            
-    # Hauptinhalt
-    st.markdown("<h1 style='font-size: 3rem; margin-bottom: 0;'>Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #4b5563; margin-bottom: 30px; font-size: 1.1rem;'>Willkommen zurück. Hier ist der aktuelle Stand deines KI-Portfolios.</p>", unsafe_allow_html=True)
-    
-    data = load_data()
-    if not data:
-        st.warning("Noch keine Daten vorhanden. Das System führt gerade seinen ersten Scan durch.")
-        return
-        
+# ==================== APP-ANSICHTEN ====================
+def show_dashboard(data):
     capital = data.get('capital', 0)
     positions = data.get('positions', {})
     history = data.get('history', [])
@@ -236,7 +192,7 @@ def main():
                     "Einstieg": f"${pos['entry']:.2f}", 
                     "Stop": f"${pos['stop']:.2f}", 
                     "Ziel": f"${pos['target']:.2f}", 
-                    "Score": pos.get('score', 0)
+                    "Score": round(pos.get('score', 0), 1)
                 })
             st.dataframe(pd.DataFrame(pos_data), use_container_width=True, hide_index=True)
         else:
@@ -257,6 +213,94 @@ def main():
             st.dataframe(pd.DataFrame(hist_data), use_container_width=True, hide_index=True)
         else:
             st.info("Noch keine Trades.")
+
+def show_scanner(data):
+    scanner_results = data.get('scanner_data', [])
+    
+    st.markdown("<h1 style='font-size: 3rem; margin-bottom: 0;'>Aktien-Scanner</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #4b5563; margin-bottom: 30px; font-size: 1.1rem;'>Hier siehst du die aktuell stärksten Aktien aus dem letzten Scan.</p>", unsafe_allow_html=True)
+    
+    if not scanner_results:
+        st.warning("Noch keine Scanner-Daten vorhanden. Bitte warte auf den nächsten Scan.")
+        return
+
+    # Suchfeld
+    search_query = st.text_input("🔍 Aktie suchen (z.B. NVDA, AAPL, TSLA)", "")
+    
+    # Daten in DataFrame umwandeln
+    df_data = []
+    for r in scanner_results:
+        if search_query.upper() in r['symbol'].upper():
+            df_data.append({
+                "Aktie": r['symbol'],
+                "Preis": f"${r['price']:.2f}",
+                "Score": round(r['score'], 1),
+                "RSI": round(r.get('rsi', 0), 1),
+                "5T Trend": f"{r.get('chg5', 0):+.2f}%"
+            })
+            
+    if df_data:
+        st.dataframe(pd.DataFrame(df_data), use_container_width=True, hide_index=True)
+    else:
+        st.info("Keine Aktie gefunden, die deiner Suche entspricht.")
+
+# ==================== HAUPT-APP ====================
+def main():
+    if "user" not in st.session_state:
+        st.session_state.user = None
+
+    if st.session_state.user is None:
+        login()
+        return
+    
+    user_email = st.session_state.user.email
+    
+    # Sidebar
+    with st.sidebar:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center;'>Edaris</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 0.8rem; letter-spacing: 3px; color: #b8935a !important;'>INTELLIGENCE</p>", unsafe_allow_html=True)
+        st.markdown("<br><hr style='border-color: #1e3a8a;'><br>", unsafe_allow_html=True)
+        
+        # Navigation
+        if "page" not in st.session_state:
+            st.session_state.page = "Dashboard"
+            
+        if st.button("📊 Dashboard", use_container_width=True, type="primary" if st.session_state.page == "Dashboard" else "secondary"):
+            st.session_state.page = "Dashboard"
+            st.rerun()
+        if st.button("🔍 Aktien-Scanner", use_container_width=True, type="primary" if st.session_state.page == "Scanner" else "secondary"):
+            st.session_state.page = "Scanner"
+            st.rerun()
+            
+        st.markdown("<br><br><hr style='border-color: #1e3a8a;'><br>", unsafe_allow_html=True)
+        
+        st.markdown(f"👤 **{user_email}**")
+        st.markdown("⭐ Status: **Beta-Tester**")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🔄 Daten aktualisieren", use_container_width=True, key="btn_refresh"):
+            st.cache_data.clear()
+            st.rerun()
+            
+        if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
+            supabase.auth.sign_out()
+            st.session_state.user = None
+            st.rerun()
+            
+    # Hauptinhalt basierend auf Navigation
+    data = load_data()
+    if not data:
+        st.warning("Noch keine Daten vorhanden. Das System führt gerade seinen ersten Scan durch.")
+        return
+        
+    if st.session_state.page == "Dashboard":
+        st.markdown("<h1 style='font-size: 3rem; margin-bottom: 0;'>Dashboard</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #4b5563; margin-bottom: 30px; font-size: 1.1rem;'>Willkommen zurück. Hier ist der aktuelle Stand deines KI-Portfolios.</p>", unsafe_allow_html=True)
+        show_dashboard(data)
+        
+    elif st.session_state.page == "Scanner":
+        show_scanner(data)
 
 if __name__ == "__main__":
     main()
