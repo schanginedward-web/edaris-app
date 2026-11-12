@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import json
-import requests
 from supabase import create_client, Client
 import plotly.graph_objects as go
+import urllib.parse
 
 # ==================== KONFIGURATION ====================
 SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co"
@@ -49,7 +49,28 @@ def init_supabase():
 
 supabase = init_supabase()
 
-# ==================== AUTHENTIFIZIERUNG ====================
+# ==================== LOGIN-LOGIK (MIT AUTO-LOGIN & ENTER) ====================
+def check_session():
+    """Prüft, ob ein Token in der URL ist und loggt den Nutzer ein."""
+    if "user" in st.session_state and st.session_state.user is not None:
+        return True
+        
+    # Wenn die URL ein Token hat, versuchen wir uns damit einzuloggen
+    query_params = st.query_params
+    if "access_token" in query_params:
+        try:
+            # Wir setzen die Session mit dem Token aus der URL
+            session = supabase.auth.set_session(query_params["access_token"], query_params.get("refresh_token", ""))
+            if session.user:
+                st.session_state.user = session.user
+                return True
+        except Exception:
+            # Wenn das Token abgelaufen ist, löschen wir es aus der URL
+            st.query_params.clear()
+            return False
+            
+    return False
+
 def login():
     st.markdown("<br><br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 1.2, 1])
@@ -77,19 +98,28 @@ def login():
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
             password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Jetzt einloggen", key="btn_submit_login", use_container_width=True, type="primary"):
-                try:
-                    response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                    st.session_state.user = response.user
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Login fehlgeschlagen: {e}")
+            
+            # ENTER-TASTE: Wenn E-Mail und Passwort ausgefüllt sind, loggen wir ein.
+            if email and password:
+                if st.button("Jetzt einloggen", key="btn_submit_login", use_container_width=True, type="primary"):
+                    try:
+                        response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                        st.session_state.user = response.user
+                        # Speichere Token in der URL, damit man eingeloggt bleibt
+                        st.query_params["access_token"] = response.session.access_token
+                        st.query_params["refresh_token"] = response.session.refresh_token
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Login fehlgeschlagen: {e}")
+            else:
+                st.button("Jetzt einloggen", key="btn_submit_login", use_container_width=True, type="primary", disabled=True)
+                
         else:
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
             new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
             new_password = st.text_input("Passwort", type="password", key="reg_password", placeholder="Mindestens 6 Zeichen")
             st.markdown("<br>", unsafe_allow_html=True)
+            
             if st.button("Jetzt registrieren", key="btn_submit_register", use_container_width=True, type="primary"):
                 try:
                     response = supabase.auth.sign_up({"email": new_email, "password": new_password})
@@ -97,12 +127,11 @@ def login():
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
 
-# ==================== DATEN LADEN (FINALER FIX) ====================
+# ==================== DATEN LADEN ====================
 def load_data():
     try:
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
-            # WIR MÜSSEN DAS PAKET ÖFFNEN! Die Daten liegen in ['data']
             return response.data[0]['data']
         return None
     except Exception as e:
@@ -232,10 +261,10 @@ def show_scanner(data):
 
 # ==================== HAUPT-APP ====================
 def main():
-    if "user" not in st.session_state:
-        st.session_state.user = None
+    # Prüfe zuerst, ob wir einen aktiven Session-Token haben
+    is_logged_in = check_session()
 
-    if st.session_state.user is None:
+    if not is_logged_in:
         login()
         return
     
@@ -269,6 +298,7 @@ def main():
         if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
             supabase.auth.sign_out()
             st.session_state.user = None
+            st.query_params.clear() # URL Token löschen
             st.rerun()
             
     data = load_data()
