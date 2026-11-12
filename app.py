@@ -192,11 +192,22 @@ def main():
     if history:
         st.markdown("<h3 style='margin-bottom: 20px;'>📈 Performance-Verlauf</h3>", unsafe_allow_html=True)
         
-        # Wir simulieren einen schönen Verlauf basierend auf den Trades
-        chart_data = pd.DataFrame({
-            "Datum": [t['date'][:10] for t in history],
-            "Wert": [capital + (i * 10) for i in range(len(history))] # Platzhalter Logik
-        })
+        # Verlauf aus der Historie berechnen
+        dates = [t['date'][:10] for t in history]
+        values = [10000]
+        current_val = 10000
+        
+        for t in history:
+            if t['type'] == 'BUY':
+                current_val -= (t['shares'] * t['price'])
+            else:
+                current_val += (t['shares'] * t['price']) + t.get('profit', 0)
+            values.append(current_val)
+            
+        values[-1] = capital
+        dates.append(pd.Timestamp.now().strftime('%Y-%m-%d'))
+        
+        chart_data = pd.DataFrame({"Datum": dates, "Wert": values})
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -206,13 +217,24 @@ def main():
             fill='tozeroy',
             fillcolor='rgba(184, 147, 90, 0.1)'
         ))
+        
+        # Dynamische Y-Achse, damit die Linie immer gut sichtbar ist
+        min_val = min(values) * 0.98
+        max_val = max(values) * 1.02
+        
         fig.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=0, r=0, t=0, b=0),
-            xaxis=dict(showgrid=False, color='#6b7280'),
-            yaxis=dict(showgrid=True, gridcolor='#e5e7eb', color='#6b7280'),
-            height=300
+            margin=dict(l=0, r=0, t=10, b=0),
+            xaxis=dict(showgrid=False, color='#6b7280', type='category'),
+            yaxis=dict(
+                showgrid=True, 
+                gridcolor='#e5e7eb', 
+                color='#6b7280',
+                range=[min_val, max_val],
+                tickprefix="$"
+            ),
+            height=350
         )
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
