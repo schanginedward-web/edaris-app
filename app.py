@@ -19,31 +19,21 @@ st.markdown("""
     h1, h2, h3 { font-family: 'Cormorant Garamond', serif !important; color: #1e3a8a !important; font-weight: 600 !important; }
     html, body, [class*="css"] { font-weight: 500 !important; }
 
-    /* Sidebar */
     section[data-testid="stSidebar"] { background-color: #0f172a; border-right: 1px solid #1e3a8a; }
     section[data-testid="stSidebar"] h2 { color: #b8935a !important; font-family: 'Cormorant Garamond', serif !important; letter-spacing: 2px; }
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span { color: #f5f1e8 !important; font-weight: 500; }
 
-    /* KPI Kacheln */
     div[data-testid="stMetric"] { background-color: #ffffff; padding: 20px; border-radius: 12px; border-top: 3px solid #b8935a; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     div[data-testid="stMetricValue"] { font-family: 'Cormorant Garamond', serif; color: #1e3a8a; font-size: 2.8rem; font-weight: 700; }
     div[data-testid="stMetricLabel"] { font-family: 'Inter', sans-serif; color: #4b5563; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.85rem; font-weight: 700; }
 
-    /* Tabellen */
     div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
     div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 700 !important; border-bottom: 2px solid #b8935a !important; }
 
-    /* Buttons */
     .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px; }
     .stButton > button:hover { background-color: #b8935a; color: #ffffff; border-color: #b8935a; }
     
-    /* Eingabefelder */
-    div[data-testid="stTextInput"] input {
-        background-color: #ffffff !important; border: 1px solid #d1d5db !important;
-        border-radius: 8px !important; padding: 12px 15px !important;
-        color: #1e3a8a !important; font-weight: 500 !important;
-        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-    }
+    div[data-testid="stTextInput"] input { background-color: #ffffff !important; border: 1px solid #d1d5db !important; border-radius: 8px !important; padding: 12px 15px !important; color: #1e3a8a !important; font-weight: 500 !important; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
     div[data-testid="stTextInput"] input:focus { border-color: #b8935a !important; box-shadow: 0 0 0 2px rgba(184, 147, 90, 0.2) !important; }
     div[data-testid="stTextInput"] label { color: #4b5563 !important; font-weight: 600 !important; font-size: 0.9rem !important; }
 
@@ -106,10 +96,10 @@ def login():
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
 
-# ==================== DATEN LADEN ====================
-@st.cache_data(ttl=60)
+# ==================== DATEN LADEN (OHNE CACHE!) ====================
 def load_data():
     try:
+        # Wir holen uns die neuesten Daten direkt aus der Datenbank
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
             return response.data[0]
@@ -120,11 +110,13 @@ def load_data():
 
 # ==================== APP-ANSICHTEN ====================
 def show_dashboard(data):
+    # HIER IST DER DEBUG-TEXT
+    st.info(f"DEBUG: Die App empfängt vom Server ein Kapital von ${data.get('capital', 0):.2f}")
+
     capital = data.get('capital', 0)
     positions = data.get('positions', {})
     history = data.get('history', [])
     
-    # ==================== KPI KACHELN ====================
     col1, col2, col3, col4 = st.columns(4)
     total_profit = capital - 10000
     profit_pct = (total_profit / 10000) * 100
@@ -136,7 +128,6 @@ def show_dashboard(data):
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # ==================== CHART ====================
     if history:
         st.markdown("<h3 style='margin-bottom: 20px;'>📈 Performance-Verlauf</h3>", unsafe_allow_html=True)
         
@@ -179,7 +170,6 @@ def show_dashboard(data):
 
     st.markdown("<br><hr><br>", unsafe_allow_html=True)
     
-    # ==================== TABELLEN ====================
     col_left, col_right = st.columns([1.5, 1])
     
     with col_left:
@@ -224,10 +214,8 @@ def show_scanner(data):
         st.warning("Noch keine Scanner-Daten vorhanden. Bitte warte auf den nächsten Scan.")
         return
 
-    # Suchfeld
     search_query = st.text_input("🔍 Aktie suchen (z.B. NVDA, AAPL, TSLA)", "")
     
-    # Daten in DataFrame umwandeln
     df_data = []
     for r in scanner_results:
         if search_query.upper() in r['symbol'].upper():
@@ -255,14 +243,12 @@ def main():
     
     user_email = st.session_state.user.email
     
-    # Sidebar
     with st.sidebar:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("<h2 style='text-align: center;'>Edaris</h2>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.8rem; letter-spacing: 3px; color: #b8935a !important;'>INTELLIGENCE</p>", unsafe_allow_html=True)
         st.markdown("<br><hr style='border-color: #1e3a8a;'><br>", unsafe_allow_html=True)
         
-        # Navigation
         if "page" not in st.session_state:
             st.session_state.page = "Dashboard"
             
@@ -280,7 +266,6 @@ def main():
         
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 Daten aktualisieren", use_container_width=True, key="btn_refresh"):
-            st.cache_data.clear()
             st.rerun()
             
         if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
@@ -288,7 +273,6 @@ def main():
             st.session_state.user = None
             st.rerun()
             
-    # Hauptinhalt basierend auf Navigation
     data = load_data()
     if not data:
         st.warning("Noch keine Daten vorhanden. Das System führt gerade seinen ersten Scan durch.")
