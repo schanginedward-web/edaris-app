@@ -3,7 +3,6 @@ import pandas as pd
 import json
 from supabase import create_client, Client
 import plotly.graph_objects as go
-import urllib.parse
 
 # ==================== KONFIGURATION ====================
 SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co"
@@ -49,26 +48,20 @@ def init_supabase():
 
 supabase = init_supabase()
 
-# ==================== LOGIN-LOGIK (MIT AUTO-LOGIN & ENTER) ====================
+# ==================== AUTHENTIFIZIERUNG ====================
 def check_session():
-    """Prüft, ob ein Token in der URL ist und loggt den Nutzer ein."""
     if "user" in st.session_state and st.session_state.user is not None:
         return True
-        
-    # Wenn die URL ein Token hat, versuchen wir uns damit einzuloggen
     query_params = st.query_params
     if "access_token" in query_params:
         try:
-            # Wir setzen die Session mit dem Token aus der URL
             session = supabase.auth.set_session(query_params["access_token"], query_params.get("refresh_token", ""))
             if session.user:
                 st.session_state.user = session.user
                 return True
         except Exception:
-            # Wenn das Token abgelaufen ist, löschen wir es aus der URL
             st.query_params.clear()
             return False
-            
     return False
 
 def login():
@@ -99,13 +92,11 @@ def login():
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
             password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
             
-            # ENTER-TASTE: Wenn E-Mail und Passwort ausgefüllt sind, loggen wir ein.
             if email and password:
                 if st.button("Jetzt einloggen", key="btn_submit_login", use_container_width=True, type="primary"):
                     try:
                         response = supabase.auth.sign_in_with_password({"email": email, "password": password})
                         st.session_state.user = response.user
-                        # Speichere Token in der URL, damit man eingeloggt bleibt
                         st.query_params["access_token"] = response.session.access_token
                         st.query_params["refresh_token"] = response.session.refresh_token
                         st.rerun()
@@ -130,11 +121,9 @@ def login():
 # ==================== DATEN LADEN ====================
 def load_data():
     try:
-        # Wir fragen die Datenbank ab und ignorieren dabei den Cache
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
             row = response.data[0]
-            # Wir packen die Daten zusammen und geben sie zurück
             return {
                 "capital": row['data']['capital'],
                 "positions": row['data']['positions'],
@@ -254,22 +243,31 @@ def show_scanner(data):
     df_data = []
     for r in scanner_results:
         if search_query.upper() in r['symbol'].upper():
+            # Wir bereiten die Daten für die schicke Tabelle vor
+            score = round(r['score'], 1)
+            # Wir erstellen einen kleinen visuellen Balken für den Score (0-100)
+            score_bar = "🟩" * int(score // 10) + "⬜" * (10 - int(score // 10))
+            
             df_data.append({
                 "Aktie": r['symbol'],
                 "Preis": f"${r['price']:.2f}",
-                "Score": round(r['score'], 1),
+                "Score": f"{score} {score_bar}",
                 "RSI": round(r.get('rsi', 0), 1),
                 "5T Trend": f"{r.get('chg5', 0):+.2f}%"
             })
             
     if df_data:
-        st.dataframe(pd.DataFrame(df_data), use_container_width=True, hide_index=True)
+        # Hier nutzen wir st.dataframe mit einem schicken Layout
+        st.dataframe(
+            pd.DataFrame(df_data), 
+            use_container_width=True, 
+            hide_index=True
+        )
     else:
         st.info("Keine Aktie gefunden, die deiner Suche entspricht.")
 
 # ==================== HAUPT-APP ====================
 def main():
-    # Prüfe zuerst, ob wir einen aktiven Session-Token haben
     is_logged_in = check_session()
 
     if not is_logged_in:
@@ -306,7 +304,7 @@ def main():
         if st.button("🚪 Ausloggen", use_container_width=True, key="btn_logout"):
             supabase.auth.sign_out()
             st.session_state.user = None
-            st.query_params.clear() # URL Token löschen
+            st.query_params.clear()
             st.rerun()
             
     data = load_data()
