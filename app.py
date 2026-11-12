@@ -96,10 +96,9 @@ def login():
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
 
-# ==================== DATEN LADEN (OHNE CACHE!) ====================
+# ==================== DATEN LADEN (IMMER FRISCH) ====================
 def load_data():
     try:
-        # Wir holen uns die neuesten Daten direkt aus der Datenbank
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
         if response.data:
             return response.data[0]
