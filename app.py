@@ -15,22 +15,9 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
-    /* Haupt-Hintergrund & Standardschrift */
-    .stApp { 
-        background-color: #f5f1e8; 
-        font-family: 'Inter', sans-serif; 
-    }
-    
-    /* Generelle Schriftdicke für Fließtext erhöhen */
-    html, body, [class*="css"] {
-        font-weight: 500 !important; 
-    }
-
-    h1, h2, h3 { 
-        font-family: 'Cormorant Garamond', serif !important; 
-        color: #1e3a8a !important; 
-        font-weight: 600 !important; 
-    }
+    .stApp { background-color: #f5f1e8; font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Cormorant Garamond', serif !important; color: #1e3a8a !important; font-weight: 600 !important; }
+    html, body, [class*="css"] { font-weight: 500 !important; }
 
     /* Sidebar */
     section[data-testid="stSidebar"] { background-color: #0f172a; border-right: 1px solid #1e3a8a; }
@@ -52,23 +39,20 @@ st.markdown("""
     
     /* Eingabefelder */
     div[data-testid="stTextInput"] input {
-        background-color: #ffffff !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 8px !important;
-        padding: 12px 15px !important;
-        color: #1e3a8a !important;
-        font-weight: 500 !important;
+        background-color: #ffffff !important; border: 1px solid #d1d5db !important;
+        border-radius: 8px !important; padding: 12px 15px !important;
+        color: #1e3a8a !important; font-weight: 500 !important;
         box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     }
     div[data-testid="stTextInput"] input:focus { border-color: #b8935a !important; box-shadow: 0 0 0 2px rgba(184, 147, 90, 0.2) !important; }
     div[data-testid="stTextInput"] label { color: #4b5563 !important; font-weight: 600 !important; font-size: 0.9rem !important; }
 
-    /* Tabs im Login (Der Fix für die Lesbarkeit) */
+    /* TABS (Der Fix für die Lesbarkeit) */
     button[data-baseweb="tab"] {
         font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        color: #4b5563 !important; /* Dunkleres Grau für inaktive Tabs */
-        font-size: 1rem !important;
+        font-weight: 700 !important;
+        color: #4b5563 !important; /* Dunkelgrau, immer gut sichtbar */
+        font-size: 1.05rem !important;
         padding: 10px 20px !important;
         border-bottom: 2px solid transparent !important;
     }
@@ -76,9 +60,6 @@ st.markdown("""
         color: #1e3a8a !important; /* Royal Blue für aktiven Tab */
         border-bottom: 2px solid #b8935a !important; /* Goldene Linie */
     }
-    div[data-baseweb="tab-highlight"] { background-color: transparent !important; } /* Versteckt den hässlichen Standard-Balken */
-
-    hr { border-color: #d1d5db; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -91,23 +72,19 @@ supabase = init_supabase()
 
 # ==================== AUTHENTIFIZIERUNG ====================
 def login():
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 1.2, 1])
     
     with col2:
         # Logo Bereich
         st.markdown("<h1 style='text-align: center; font-size: 4rem; margin-bottom: 0; color: #1e3a8a;'>Edaris</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; font-size: 0.9rem; letter-spacing: 4px; color: #b8935a; text-transform: uppercase; margin-bottom: 40px; font-weight: 600;'>Intelligence</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 0.9rem; letter-spacing: 4px; color: #b8935a; text-transform: uppercase; margin-bottom: 30px; font-weight: 600;'>Intelligence</p>", unsafe_allow_html=True)
         
-        # Formular Karte
-        st.markdown("""
-            <div style="background-color: #ffffff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-top: 4px solid #b8935a;">
-        """, unsafe_allow_html=True)
-        
+        # Tabs
         tab1, tab2 = st.tabs(["Einloggen", "Registrieren"])
         
         with tab1:
-            st.markdown("<p style='color: #4b5563; font-size: 0.95rem; margin-bottom: 20px; font-weight: 500;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
             password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
             st.markdown("<br>", unsafe_allow_html=True)
@@ -120,7 +97,7 @@ def login():
                     st.error(f"Login fehlgeschlagen: {e}")
                     
         with tab2:
-            st.markdown("<p style='color: #4b5563; font-size: 0.95rem; margin-bottom: 20px; font-weight: 500;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
             new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
             new_password = st.text_input("Passwort", type="password", key="reg_password", placeholder="Mindestens 6 Zeichen")
             st.markdown("<br>", unsafe_allow_html=True)
@@ -130,8 +107,6 @@ def login():
                     st.success("Konto erstellt! Bitte prüfe deine E-Mails oder logge dich direkt ein.")
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
-                    
-        st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================== DATEN LADEN ====================
 @st.cache_data(ttl=60)
