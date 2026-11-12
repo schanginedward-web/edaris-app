@@ -96,7 +96,7 @@ def login():
                 except Exception as e:
                     st.error(f"Registrierung fehlgeschlagen: {e}")
 
-# ==================== DATEN LADEN (IMMER FRISCH) ====================
+# ==================== DATEN LADEN ====================
 def load_data():
     try:
         response = supabase.table('live_data').select('*').eq('id', 1).execute()
@@ -109,9 +109,6 @@ def load_data():
 
 # ==================== APP-ANSICHTEN ====================
 def show_dashboard(data):
-    # HIER IST DER DEBUG-TEXT
-    st.info(f"DEBUG: Die App empfängt vom Server ein Kapital von ${data.get('capital', 0):.2f}")
-
     capital = data.get('capital', 0)
     positions = data.get('positions', {})
     history = data.get('history', [])
