@@ -10,7 +10,7 @@ SUPABASE_KEY = "sb_publishable_cYbHqfJ9-CPddBtmzu7vYA_by5W0-Js"
 
 st.set_page_config(page_title="Edaris AI", page_icon="📊", layout="wide")
 
-# ==================== CUSTOM CSS (Premium Look) ====================
+# ==================== CUSTOM CSS ====================
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -33,7 +33,7 @@ st.markdown("""
     div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
     div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 700 !important; border-bottom: 2px solid #b8935a !important; }
 
-    /* Buttons */
+    /* Buttons (Standard) */
     .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px; }
     .stButton > button:hover { background-color: #b8935a; color: #ffffff; border-color: #b8935a; }
     
@@ -47,19 +47,7 @@ st.markdown("""
     div[data-testid="stTextInput"] input:focus { border-color: #b8935a !important; box-shadow: 0 0 0 2px rgba(184, 147, 90, 0.2) !important; }
     div[data-testid="stTextInput"] label { color: #4b5563 !important; font-weight: 600 !important; font-size: 0.9rem !important; }
 
-    /* TABS (Der Fix für die Lesbarkeit) */
-    button[data-baseweb="tab"] {
-        font-family: 'Inter', sans-serif;
-        font-weight: 700 !important;
-        color: #4b5563 !important; /* Dunkelgrau, immer gut sichtbar */
-        font-size: 1.05rem !important;
-        padding: 10px 20px !important;
-        border-bottom: 2px solid transparent !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #1e3a8a !important; /* Royal Blue für aktiven Tab */
-        border-bottom: 2px solid #b8935a !important; /* Goldene Linie */
-    }
+    hr { border-color: #d1d5db; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -80,15 +68,30 @@ def login():
         st.markdown("<h1 style='text-align: center; font-size: 4rem; margin-bottom: 0; color: #1e3a8a;'>Edaris</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.9rem; letter-spacing: 4px; color: #b8935a; text-transform: uppercase; margin-bottom: 30px; font-weight: 600;'>Intelligence</p>", unsafe_allow_html=True)
         
-        # Tabs
-        tab1, tab2 = st.tabs(["Einloggen", "Registrieren"])
+        # View-Zustand (Login oder Registrieren)
+        if "auth_view" not in st.session_state:
+            st.session_state.auth_view = "login"
+            
+        # Schicke Buttons statt Tabs
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Einloggen", use_container_width=True, type="primary" if st.session_state.auth_view == "login" else "secondary"):
+                st.session_state.auth_view = "login"
+                st.rerun()
+        with c2:
+            if st.button("Registrieren", use_container_width=True, type="primary" if st.session_state.auth_view == "register" else "secondary"):
+                st.session_state.auth_view = "register"
+                st.rerun()
+                
+        st.markdown("<br>", unsafe_allow_html=True)
         
-        with tab1:
+        # Login Formular
+        if st.session_state.auth_view == "login":
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Willkommen zurück. Bitte logge dich ein.</p>", unsafe_allow_html=True)
             email = st.text_input("E-Mail", key="login_email", placeholder="deine@email.de")
             password = st.text_input("Passwort", type="password", key="login_password", placeholder="••••••••")
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Einloggen", use_container_width=True):
+            if st.button("Einloggen", use_container_width=True, type="primary"):
                 try:
                     response = supabase.auth.sign_in_with_password({"email": email, "password": password})
                     st.session_state.user = response.user
@@ -96,12 +99,13 @@ def login():
                 except Exception as e:
                     st.error(f"Login fehlgeschlagen: {e}")
                     
-        with tab2:
+        # Registrieren Formular
+        else:
             st.markdown("<p style='color: #4b5563; font-size: 0.95rem; font-weight: 500;'>Erstelle ein neues Konto für die Beta.</p>", unsafe_allow_html=True)
             new_email = st.text_input("E-Mail", key="reg_email", placeholder="deine@email.de")
             new_password = st.text_input("Passwort", type="password", key="reg_password", placeholder="Mindestens 6 Zeichen")
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Konto erstellen", use_container_width=True):
+            if st.button("Konto erstellen", use_container_width=True, type="primary"):
                 try:
                     response = supabase.auth.sign_up({"email": new_email, "password": new_password})
                     st.success("Konto erstellt! Bitte prüfe deine E-Mails oder logge dich direkt ein.")
