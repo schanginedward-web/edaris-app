@@ -4,8 +4,8 @@ from supabase import create_client, Client
 
 # ==================== KONFIGURATION ====================
 # (Hier die gleichen Supabase-Daten eintragen wie in der main.py)
-SUPABASE_URL = "DEINE_SUPABASE_URL_HIER"
-SUPABASE_KEY = "DEIN_SUPABASE_ANON_KEY_HIER"
+SUPABASE_URL = "https://amloinitcdockedfmxhu.supabase.co/rest/v1/"
+SUPABASE_KEY = "sb_publishable_cYbHqfJ9-CPddBtmzu7vYA_by5W0-Js"
 
 st.set_page_config(page_title="Edaris AI", page_icon="📊", layout="wide")
 
