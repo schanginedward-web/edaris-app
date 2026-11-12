@@ -27,8 +27,32 @@ st.markdown("""
     div[data-testid="stMetricValue"] { font-family: 'Cormorant Garamond', serif; color: #1e3a8a; font-size: 2.8rem; font-weight: 700; }
     div[data-testid="stMetricLabel"] { font-family: 'Inter', sans-serif; color: #4b5563; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.85rem; font-weight: 700; }
 
-    div[data-testid="stDataFrame"] { background-color: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
-    div[data-testid="stDataFrame"] th { background-color: #f5f1e8 !important; color: #1e3a8a !important; font-weight: 700 !important; border-bottom: 2px solid #b8935a !important; }
+    /* Hier zwingen wir die Tabelle ins helle Design */
+    div[data-testid="stDataFrame"] { 
+        background-color: #ffffff !important; 
+        padding: 15px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+        border: 1px solid #e5e7eb; 
+    }
+    div[data-testid="stDataFrame"] > div {
+        background-color: #ffffff !important;
+        color: #1e3a8a !important;
+    }
+    div[data-testid="stDataFrame"] table {
+        background-color: #ffffff !important;
+        color: #1e3a8a !important;
+    }
+    div[data-testid="stDataFrame"] th { 
+        background-color: #f5f1e8 !important; 
+        color: #1e3a8a !important; 
+        font-weight: 700 !important; 
+        border-bottom: 2px solid #b8935a !important; 
+    }
+    div[data-testid="stDataFrame"] td {
+        color: #1e3a8a !important;
+        background-color: #ffffff !important;
+    }
 
     .stButton > button { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px; }
     .stButton > button:hover { background-color: #b8935a; color: #ffffff; border-color: #b8935a; }
@@ -243,9 +267,7 @@ def show_scanner(data):
     df_data = []
     for r in scanner_results:
         if search_query.upper() in r['symbol'].upper():
-            # Wir bereiten die Daten für die schicke Tabelle vor
             score = round(r['score'], 1)
-            # Wir erstellen einen kleinen visuellen Balken für den Score (0-100)
             score_bar = "🟩" * int(score // 10) + "⬜" * (10 - int(score // 10))
             
             df_data.append({
@@ -257,12 +279,7 @@ def show_scanner(data):
             })
             
     if df_data:
-        # Hier nutzen wir st.dataframe mit einem schicken Layout
-        st.dataframe(
-            pd.DataFrame(df_data), 
-            use_container_width=True, 
-            hide_index=True
-        )
+        st.dataframe(pd.DataFrame(df_data), use_container_width=True, hide_index=True)
     else:
         st.info("Keine Aktie gefunden, die deiner Suche entspricht.")
 
